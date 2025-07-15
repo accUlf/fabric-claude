@@ -17,7 +17,7 @@ The orchestration pipeline `pipe_bronze_to_silver_orchestration` cannot referenc
    - `nb_bronze_to_silver_location_dim`
    - `nb_bronze_to_silver_payment_vendor_dims`
    - `nb_bronze_to_silver_fact_trips`
-   - `nb_silver_quality_checks`
+   - `nb_quality_validation`
 
 2. **Then create the pipeline** - it will be able to reference the existing notebooks
 
@@ -36,7 +36,7 @@ After ALL dimension notebooks complete successfully:
 
 #### Phase 3: Quality Validation (Final)
 After the fact table completes:
-- `nb_silver_quality_checks`
+- `nb_quality_validation`
 
 ## Expected Pipeline Configuration
 Once all notebooks exist, the pipeline should work with this configuration:
@@ -88,7 +88,7 @@ Bronze Layer (lh_claude_bronze)
     └── nb_bronze_to_silver_fact_trips ──► Silver Layer (lh_silver)
                                             │
                                             ▼
-                                    nb_silver_quality_checks
+                                    nb_quality_validation
 ```
 
 ## Troubleshooting
@@ -98,7 +98,7 @@ Bronze Layer (lh_claude_bronze)
 - **Check**: Verify notebook exists in Fabric workspace (not just git)
 
 ### Error: "Reserved name conflict"
-- **Solution**: Already fixed - notebook renamed to `nb_silver_quality_checks`
+- **Solution**: Already fixed - notebook renamed to `nb_quality_validation`
 - **Check**: Ensure you're using the new notebook name
 
 ### Pipeline Dependency Failures
@@ -135,7 +135,7 @@ If you prefer to avoid the pipeline complexity initially:
 3. **Run Quality Checks**:
    ```
    Execute after fact table completes:
-   - nb_silver_quality_checks
+   - nb_quality_validation
    ```
 
 This approach gives you full control and visibility into each step of the transformation process.

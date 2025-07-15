@@ -108,7 +108,7 @@
         },
         "typeProperties": {
           "notebook": {
-            "referenceName": "nb_silver_quality_checks",
+            "referenceName": "nb_quality_validation",
             "type": "NotebookReference"
           },
           "parameters": {}
