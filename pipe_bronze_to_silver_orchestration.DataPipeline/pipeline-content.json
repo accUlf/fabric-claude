@@ -127,8 +127,8 @@
         "value": "Bronze to Silver transformation orchestration"
       },
       {
-        "key": "schedule",
-        "value": "Daily at 02:00 AM"
+        "key": "setup_required",
+        "value": "Create all notebooks in workspace first - see PIPELINE_SETUP.md"
       }
     ]
   }
