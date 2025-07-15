@@ -10,7 +10,18 @@
 # META     "lakehouse": {
 # META       "default_lakehouse": "a7b8c9d0-e1f2-3456-7890-bcdef1234567",
 # META       "default_lakehouse_name": "lh_silver",
-# META       "default_lakehouse_workspace_id": ""
+# META       "default_lakehouse_workspace_id": "",
+# META       "known_lakehouses": [
+# META         {
+# META           "id": "a7b8c9d0-e1f2-3456-7890-bcdef1234567"
+# META         },
+# META         {
+# META           "id": "f119dd17-9b03-45bf-a7d5-e53a9d42b42e"
+# META         },
+# META         {
+# META           "id": "23928326-44ff-4960-b890-e9dc360f4419"
+# META         }
+# META       ]
 # META     }
 # META   }
 # META }
@@ -32,6 +43,13 @@ from pyspark.sql.window import Window
 # Initialize Spark session
 spark = SparkSession.builder.appName("FactTripsTransformation").getOrCreate()
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Read data from bronze layer
@@ -39,6 +57,13 @@ bronze_df = spark.read.format("delta").load("abfss://lh_claude_bronze@onelake.df
 
 print(f"Total records in bronze layer: {bronze_df.count()}")
 bronze_df.printSchema()
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -49,6 +74,13 @@ dim_payment = spark.read.format("delta").load("Tables/dim_payment_type")
 dim_vendor = spark.read.format("delta").load("Tables/dim_vendor")
 dim_rate_code = spark.read.format("delta").load("Tables/dim_rate_code")
 dim_trip_type = spark.read.format("delta").load("Tables/dim_trip_type")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -82,6 +114,13 @@ fact_trips = fact_trips.join(
     "left"
 )
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Continue with other dimension joins and create calculated measures
@@ -98,6 +137,13 @@ fact_trips_transformed = fact_trips \
     .withColumn("tip_percentage", 
         when(col("fareAmount") > 0, round((col("tipAmount") / col("fareAmount")) * 100, 2))
         .otherwise(0))
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -149,6 +195,13 @@ fact_trips_final = fact_trips_transformed.select(
     (col("total_amount") < 1000)  # Less than $1000
 )
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Add a unique trip ID
@@ -161,6 +214,13 @@ fact_trips_final = fact_trips_final.select("trip_id", *[col for col in fact_trip
 print(f"Fact table records after filtering: {fact_trips_final.count()}")
 fact_trips_final.printSchema()
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Write fact table to silver layer
@@ -171,6 +231,13 @@ fact_trips_final.write \
     .save("Tables/fact_trips")
 
 print(f"Fact trips table created with {fact_trips_final.count()} records")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -190,6 +257,13 @@ display(spark.sql("""
     ORDER BY trip_date DESC
     LIMIT 30
 """))
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -214,6 +288,13 @@ quality_metrics = spark.sql("""
 for col_name in quality_metrics.__fields__:
     print(f"{col_name}: {quality_metrics[col_name]}")
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Create summary statistics by dimension
@@ -237,4 +318,11 @@ display(spark.sql("""
     FROM lh_silver.fact_trips
     GROUP BY vendor_key
     ORDER BY trip_count DESC
-"""))
+""")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }

@@ -137,4 +137,4 @@ display(spark.sql("SELECT * FROM lh_silver.dim_time ORDER BY datetime DESC LIMIT
 print("Data Quality Checks:")
 print(f"Null datetime values: {time_dim_final.filter(col('datetime').isNull()).count()}")
 print(f"Duplicate time_key values: {time_dim_final.groupBy('time_key').count().filter(col('count') > 1).count()}")
-print(f"Date range: {time_dim_final.agg(min('datetime'), max('datetime')).collect()[0]}")
+print(f"Date range: {time_dim_final.agg(min('datetime'), max('datetime')).collect()[0]}"

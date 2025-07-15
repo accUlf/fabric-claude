@@ -206,4 +206,4 @@ print("\nRate Code Distribution in Bronze Data:")
 display(bronze_df.groupBy("rateCodeID").count().orderBy("rateCodeID"))
 
 print("\nTrip Type Distribution in Bronze Data:")
-display(bronze_df.groupBy("tripType").count().orderBy("tripType"))
+display(bronze_df.groupBy("tripType").count().orderBy("tripType")
