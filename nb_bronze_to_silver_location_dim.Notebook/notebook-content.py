@@ -10,7 +10,18 @@
 # META     "lakehouse": {
 # META       "default_lakehouse": "a7b8c9d0-e1f2-3456-7890-bcdef1234567",
 # META       "default_lakehouse_name": "lh_silver",
-# META       "default_lakehouse_workspace_id": ""
+# META       "default_lakehouse_workspace_id": "",
+# META       "known_lakehouses": [
+# META         {
+# META           "id": "a7b8c9d0-e1f2-3456-7890-bcdef1234567"
+# META         },
+# META         {
+# META           "id": "23928326-44ff-4960-b890-e9dc360f4419"
+# META         },
+# META         {
+# META           "id": "f119dd17-9b03-45bf-a7d5-e53a9d42b42e"
+# META         }
+# META       ]
 # META     }
 # META   }
 # META }
@@ -31,14 +42,28 @@ import math
 # Initialize Spark session
 spark = SparkSession.builder.appName("LocationDimensionTransformation").getOrCreate()
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Read data from bronze layer
-bronze_df = spark.read.format("delta").load("abfss://lh_claude_bronze@onelake.dfs.fabric.microsoft.com/Tables/nyctlc")
+bronze_df = spark.read.format("delta").load("abfss://f7bbc500-7787-4138-860d-8bd780c2d7e7@onelake.dfs.fabric.microsoft.com/23928326-44ff-4960-b890-e9dc360f4419/Tables/dbo/nyctlc")
 
 # Display sample location data
 display(bronze_df.select("puLocationId", "doLocationId", "pickupLongitude", "pickupLatitude", 
                         "dropoffLongitude", "dropoffLatitude").limit(10))
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -77,6 +102,13 @@ all_locations = pickup_locations.union(dropoff_locations) \
 
 print(f"Total unique locations: {all_locations.count()}")
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Define NYC borough boundaries (approximate)
@@ -101,6 +133,13 @@ def get_borough(lat, lon):
 
 # Register UDF
 get_borough_udf = udf(get_borough, StringType())
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -137,6 +176,13 @@ location_dim = location_dim.withColumn(
 # Display sample of the location dimension
 display(location_dim.orderBy(col("occurrence_count").desc()).limit(20))
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Add distance from city center (Times Square: 40.7580, -73.9855)
@@ -162,6 +208,13 @@ location_dim_final = location_dim.withColumn(
 # Show schema
 location_dim_final.printSchema()
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Write location dimension to silver layer
@@ -172,6 +225,13 @@ location_dim_final.write \
     .save("Tables/dim_location")
 
 print(f"Location dimension created with {location_dim_final.count()} records")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -189,6 +249,13 @@ display(spark.sql("""
     ORDER BY location_count DESC
 """))
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Data quality checks
@@ -197,3 +264,10 @@ print(f"Null location_id values: {location_dim_final.filter(col('location_id').i
 print(f"Invalid coordinates (0,0): {location_dim_final.filter((col('latitude') == 0) & (col('longitude') == 0)).count()}")
 print(f"Locations by borough:")
 display(location_dim_final.groupBy("borough").count().orderBy("count", ascending=False)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
