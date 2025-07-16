@@ -119,7 +119,7 @@ time_dim_final.write \
     .format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .save("Tables/dim_time")
+    .saveAsTable("dim_time")
 
 print(f"Time dimension created with {time_dim_final.count()} records")
 

@@ -228,7 +228,7 @@ fact_trips_final.write \
     .format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .save("Tables/fact_trips")
+    .saveAsTable("fact_trips")
 
 print(f"Fact trips table created with {fact_trips_final.count()} records")
 

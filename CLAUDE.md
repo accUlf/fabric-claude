@@ -69,7 +69,7 @@ The notebooks include embedded quality checks:
 df = spark.read.format("delta").load("Tables/bronze_trips")
 
 # Writing to silver with overwrite
-df.write.format("delta").mode("overwrite").save("Tables/silver_fact_trips")
+df.write.format("delta").mode("overwrite").saveAsTable("silver_fact_trips")
 
 # Incremental processing pattern
 df.filter(col("date") > last_processed_date)
