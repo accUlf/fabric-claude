@@ -8,9 +8,17 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "a7b8c9d0-e1f2-3456-7890-bcdef1234567",
-# META       "default_lakehouse_name": "lh_silver",
-# META       "default_lakehouse_workspace_id": ""
+# META       "default_lakehouse": "062f87df-f6a6-48ad-918f-c87315f05442",
+# META       "default_lakehouse_name": "lh_claude_silver",
+# META       "default_lakehouse_workspace_id": "f7bbc500-7787-4138-860d-8bd780c2d7e7",
+# META       "known_lakehouses": [
+# META         {
+# META           "id": "23928326-44ff-4960-b890-e9dc360f4419"
+# META         },
+# META         {
+# META           "id": "062f87df-f6a6-48ad-918f-c87315f05442"
+# META         }
+# META       ]
 # META     }
 # META   }
 # META }
@@ -30,13 +38,43 @@ from pyspark.sql.types import *
 # Initialize Spark session
 spark = SparkSession.builder.appName("ReferencesDimensionTransformation").getOrCreate()
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+# Welche Tabellen sind in dieser Datenbank?
+spark.sql("SHOW TABLES").show(20, truncate=False)
+
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 # Read data from bronze layer
-bronze_df = spark.read.format("delta").load("abfss://lh_claude_bronze@onelake.dfs.fabric.microsoft.com/Tables/nyctlc")
+bronze_df = spark.read.format("delta").load("abfss://f7bbc500-7787-4138-860d-8bd780c2d7e7@onelake.dfs.fabric.microsoft.com/23928326-44ff-4960-b890-e9dc360f4419/Tables/dbo/nyctlc")
 
 # Display sample reference data
-display(bronze_df.select("paymentType", "vendorID", "rateCodeID", "tripType").limit(20))
+#display(bronze_df.select("paymentType", "vendorID", "rateCodeID", "tripType").limit(20))
+
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -63,7 +101,14 @@ payment_dim = spark.createDataFrame(payment_data, payment_schema)
 payment_dim = payment_dim.withColumn("created_date", current_date()) \
     .withColumn("is_active", lit(True))
 
-display(payment_dim)
+#display(payment_dim)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -88,7 +133,14 @@ vendor_dim = spark.createDataFrame(vendor_data, vendor_schema)
 vendor_dim = vendor_dim.withColumn("created_date", current_date()) \
     .withColumn("is_active", lit(True))
 
-display(vendor_dim)
+#display(vendor_dim)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -115,7 +167,14 @@ rate_code_dim = spark.createDataFrame(rate_code_data, rate_code_schema)
 rate_code_dim = rate_code_dim.withColumn("created_date", current_date()) \
     .withColumn("is_airport_rate", when(col("rate_code_id").isin(2, 3), True).otherwise(False))
 
-display(rate_code_dim)
+#display(rate_code_dim)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -137,18 +196,30 @@ trip_type_dim = spark.createDataFrame(trip_type_data, trip_type_schema)
 trip_type_dim = trip_type_dim.withColumn("created_date", current_date()) \
     .withColumn("is_active", lit(True))
 
-display(trip_type_dim)
+#display(trip_type_dim)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
-# Write Payment Type dimension to silver layer
+# Statt .save() - direkt als Tabelle schreiben
 payment_dim.write \
     .format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .save("Tables/dim_payment_type")
+    .saveAsTable("dim_payment_type")
 
-print(f"Payment Type dimension created with {payment_dim.count()} records")
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -157,9 +228,16 @@ vendor_dim.write \
     .format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .save("Tables/dim_vendor")
+    .saveAsTable("dim_vendor")
 
-print(f"Vendor dimension created with {vendor_dim.count()} records")
+#print(f"Vendor dimension created with {vendor_dim.count()} records")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -168,9 +246,16 @@ rate_code_dim.write \
     .format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .save("Tables/dim_rate_code")
+    .saveAsTable("dim_rate_code")
 
-print(f"Rate Code dimension created with {rate_code_dim.count()} records")
+#print(f"Rate Code dimension created with {rate_code_dim.count()} records")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -179,31 +264,13 @@ trip_type_dim.write \
     .format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .save("Tables/dim_trip_type")
+    .saveAsTable("dim_trip_type")
 
-print(f"Trip Type dimension created with {trip_type_dim.count()} records")
+#print(f"Trip Type dimension created with {trip_type_dim.count()} records")
 
-# CELL ********************
+# METADATA ********************
 
-# Create views for easy querying
-spark.sql("CREATE OR REPLACE TABLE lh_silver.dim_payment_type USING DELTA LOCATION 'Tables/dim_payment_type'")
-spark.sql("CREATE OR REPLACE TABLE lh_silver.dim_vendor USING DELTA LOCATION 'Tables/dim_vendor'")
-spark.sql("CREATE OR REPLACE TABLE lh_silver.dim_rate_code USING DELTA LOCATION 'Tables/dim_rate_code'")
-spark.sql("CREATE OR REPLACE TABLE lh_silver.dim_trip_type USING DELTA LOCATION 'Tables/dim_trip_type'")
-
-print("All dimension tables created successfully!")
-
-# CELL ********************
-
-# Verify all dimensions with actual data distribution
-print("Payment Type Distribution in Bronze Data:")
-display(bronze_df.groupBy("paymentType").count().orderBy("paymentType"))
-
-print("\nVendor Distribution in Bronze Data:")
-display(bronze_df.groupBy("vendorID").count().orderBy("vendorID"))
-
-print("\nRate Code Distribution in Bronze Data:")
-display(bronze_df.groupBy("rateCodeID").count().orderBy("rateCodeID"))
-
-print("\nTrip Type Distribution in Bronze Data:")
-display(bronze_df.groupBy("tripType").count().orderBy("tripType")
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
